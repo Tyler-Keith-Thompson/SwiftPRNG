@@ -19,6 +19,7 @@ swift_library(
     visibility = ["//:__pkg__"],
     deps = [
         "//Sources/SeedTrees",
+        "//Sources/Distributions",
         "//Sources/Generators",
         "//Sources/SeedDiscovery",
         "//Tests/SwiftPRNGTestSupport",

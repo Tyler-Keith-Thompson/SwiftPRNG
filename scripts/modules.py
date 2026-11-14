@@ -49,9 +49,10 @@ MODULES = [
     # Generators
     ("Generators", "Generators", "SeedableRandomNumberGenerator and the generators: SplitMix64, Xoroshiro128Plus and Xoshiro256StarStar, with jumps for independent streams.", []),
     ("Sampling", "Generators", "Platform-stable draws from any RandomNumberGenerator: uniform doubles, unbiased integers in a range, Bernoulli trials.", []),
+    ("Distributions", "Generators", "Distribution and platform-stable samplers: normal, exponential, triangular, log-normal, gamma, Poisson, geometric and weighted choice.", ["Sampling"]),
     # Seeds
     ("SeedDiscovery", "Seeds", "SeedSearch: the first seed in a range that does what a predicate asks, sequentially or across cores.", []),
-    ("SeedTrees", "Seeds", "SeedTree: a deterministic tree of seeds keyed by names and indices, with overrides that make subtrees independently fittable.", ["Generators", "Sampling", "SeedDiscovery"]),
+    ("SeedTrees", "Seeds", "SeedTree: a deterministic tree of seeds keyed by names and indices, with overrides that make subtrees independently fittable.", ["Distributions", "Generators", "Sampling", "SeedDiscovery"]),
 ]
 
 # Modules only iOS builds: SwiftUI views and what they draw with. Bazel builds them for the
@@ -72,8 +73,9 @@ EXECUTABLES = [
 TEST_TARGETS = [
     ("GeneratorsTests", ["Generators", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
     ("SamplingTests", ["Sampling", "Generators", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
+    ("DistributionsTests", ["Distributions", "Generators", "Sampling", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
     ("SeedDiscoveryTests", ["SeedDiscovery", "Generators", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
-    ("SeedTreesTests", ["SeedTrees", "Generators", "SeedDiscovery", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
+    ("SeedTreesTests", ["SeedTrees", "Distributions", "Generators", "SeedDiscovery", TEST_SUPPORT, "swift-property-based/PropertyBased"]),
     (f"{PROJECT}Tests", [PROJECT]),
 ]
 
@@ -106,7 +108,7 @@ RELEASE_EXCLUDED_TAG = "debug-only"
 
 # The library modules the differential harness (Differential/, scripts/differential.py) links.
 # Both its Package.swift and its BUILD.bazel are written from this list.
-DIFFERENTIAL_DEPENDENCIES = ["Generators", "Sampling", "SeedTrees"]
+DIFFERENTIAL_DEPENDENCIES = ["Distributions", "Generators", "Sampling", "SeedTrees"]
 
 # The Benchmarks/ package's targets: (name, library modules it imports). Both its Package.swift and
 # its BUILD.bazel are written from this list. Each target is an ordo-one/benchmark executable in
@@ -115,6 +117,7 @@ DIFFERENTIAL_DEPENDENCIES = ["Generators", "Sampling", "SeedTrees"]
 BENCHMARKS = [
     ("GeneratorsBenchmarks", ["Generators"]),
     ("SamplingBenchmarks", ["Sampling", "Generators"]),
+    ("DistributionsBenchmarks", ["Distributions", "Generators"]),
     ("SeedTreesBenchmarks", ["SeedTrees"]),
 ]
 BENCHMARK_PACKAGE = ("https://github.com/ordo-one/benchmark", "1.27.0")

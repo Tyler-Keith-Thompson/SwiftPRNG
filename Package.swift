@@ -25,6 +25,7 @@ let products: [Product] = [
     .library(name: "SwiftPRNG", targets: ["SwiftPRNG"]),
     .library(name: "Generators", targets: ["Generators"]),
     .library(name: "Sampling", targets: ["Sampling"]),
+    .library(name: "Distributions", targets: ["Distributions"]),
     .library(name: "SeedDiscovery", targets: ["SeedDiscovery"]),
     .library(name: "SeedTrees", targets: ["SeedTrees"]),
 ]
@@ -37,20 +38,22 @@ let targets: [Target] = [
     // Generators
     .target(name: "Generators", exclude: bazelFiles),
     .target(name: "Sampling", exclude: bazelFiles),
+    .target(name: "Distributions", dependencies: ["Sampling"], exclude: bazelFiles),
     // Seeds
     .target(name: "SeedDiscovery", exclude: bazelFiles),
-    .target(name: "SeedTrees", dependencies: ["Generators", "Sampling", "SeedDiscovery"], exclude: bazelFiles),
+    .target(name: "SeedTrees", dependencies: ["Distributions", "Generators", "Sampling", "SeedDiscovery"], exclude: bazelFiles),
 
     // Umbrella: `import SwiftPRNG` imports every module.
-    .target(name: "SwiftPRNG", dependencies: ["Generators", "Sampling", "SeedDiscovery", "SeedTrees"], exclude: bazelFiles),
+    .target(name: "SwiftPRNG", dependencies: ["Generators", "Sampling", "Distributions", "SeedDiscovery", "SeedTrees"], exclude: bazelFiles),
 
     // Shared fixtures (data only) for every test target.
     .target(name: "SwiftPRNGTestSupport", path: "Tests/SwiftPRNGTestSupport", exclude: bazelFiles),
 
     .testTarget(name: "GeneratorsTests", dependencies: ["Generators", "SwiftPRNGTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: testExcludes(bazelFiles, wasi: [])),
     .testTarget(name: "SamplingTests", dependencies: ["Sampling", "Generators", "SwiftPRNGTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: testExcludes(bazelFiles, wasi: ["SamplingExitTests.swift"])),
+    .testTarget(name: "DistributionsTests", dependencies: ["Distributions", "Generators", "Sampling", "SwiftPRNGTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: testExcludes(bazelFiles, wasi: ["DistributionsExitTests.swift"])),
     .testTarget(name: "SeedDiscoveryTests", dependencies: ["SeedDiscovery", "Generators", "SwiftPRNGTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: testExcludes(bazelFiles, wasi: ["ConcurrentSeedSearchExitTests.swift"])),
-    .testTarget(name: "SeedTreesTests", dependencies: ["SeedTrees", "Generators", "SeedDiscovery", "SwiftPRNGTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: testExcludes(bazelFiles, wasi: [])),
+    .testTarget(name: "SeedTreesTests", dependencies: ["SeedTrees", "Distributions", "Generators", "SeedDiscovery", "SwiftPRNGTestSupport", .product(name: "PropertyBased", package: "swift-property-based")], exclude: testExcludes(bazelFiles, wasi: [])),
     .testTarget(name: "SwiftPRNGTests", dependencies: ["SwiftPRNG"], exclude: testExcludes(bazelFiles, wasi: [])),
 ]
 

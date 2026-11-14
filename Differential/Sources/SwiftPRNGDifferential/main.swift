@@ -6,12 +6,14 @@
 import Foundation
 
 struct Case: Decodable {
+    let distributions: DistributionsCase?
     let generators: GeneratorsCase?
     let sampling: SamplingCase?
     let seedtrees: SeedTreesCase?
 }
 
 struct Answer: Encodable {
+    var distributions: DistributionsAnswer?
     var generators: GeneratorsAnswer?
     var sampling: SamplingAnswer?
     var seedtrees: SeedTreesAnswer?
@@ -24,6 +26,9 @@ func asked(_ section: String) -> Bool { sections.isEmpty || sections.contains(se
 let cases = try JSONDecoder().decode([Case].self, from: FileHandle.standardInput.readDataToEndOfFile())
 let answers = cases.map { item in
     var answer = Answer()
+    if asked("distributions"), let distributions = item.distributions {
+        answer.distributions = DistributionsAnswer(distributions)
+    }
     if asked("generators"), let generators = item.generators {
         answer.generators = GeneratorsAnswer(generators)
     }

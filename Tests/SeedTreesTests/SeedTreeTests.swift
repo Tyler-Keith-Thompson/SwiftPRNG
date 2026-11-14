@@ -1,6 +1,7 @@
 // Each test is self-contained. Golden values come from the pure-Python reference in
 // scripts/differential_seedtrees.py (SplitMix64 and FNV-1a written out).
 
+import Distributions
 import Generators
 import SeedTrees
 import SwiftPRNGTestSupport
@@ -155,6 +156,23 @@ struct SeedTreeTests {
         #expect(node.bernoulli(0.5) == success)
         #expect(Set((0 ..< 200).map { SeedTree(UInt64($0)).integer(in: 0 ..< 4) }) == [0, 1, 2, 3])
         #expect((0 ..< 100).filter { SeedTree(UInt64($0)).bernoulli(0.25) }.count == 14)
+    }
+
+    @Test("Sampling a distribution from a node is pure: every call gives the first sample of a fresh generator")
+    func samplingDistribution() {
+        let node = SeedTree(42)["customer", 7, "service"]
+        let distribution = GammaDistribution(shape: 2, scale: 3)
+        var generator = node.generator
+        let expected = distribution.sample(using: &generator)
+
+        let first = node.sample(distribution)
+        let second = node.sample(distribution)
+        let viaFactory = node.sample(.gamma(shape: 2, scale: 3))
+
+        #expect(first == second)
+        #expect(first == expected)
+        #expect(viaFactory == expected)
+        #expect(node.sample(.normal(mean: 1, standardDeviation: 0)) == 1)
     }
 
     @Test("The generator is Xoroshiro128Plus seeded with the node's seed, and other kinds are available")

@@ -6,6 +6,7 @@ module, in their own package so the library never links the fuzzer runtime.
 | Target | Checks against |
 |---|---|
 | `FuzzGenerators` | Any sequence of draws, jumps, long jumps, snapshots on all three generators: a twin stepped through the same operations agrees; `jumped()` leaves what `jump()` leaves; a copy taken earlier is unaffected; equal generators hash equally |
+| `FuzzDistributions` | Every distribution's parameters drawn from anchors at the edges of its domain (zero, subnormals, the Poisson thresholds 10 and 2³⁰, the largest values, infinities, NaN): each checked initializer throws exactly where the model says the parameters are invalid, a sample lands in its support, and each sampler takes the draws its documentation states |
 | `FuzzSampling` | Integer ranges built from anchors at the edges of `Int` and around zero, intervals from tiny to 1e300, probabilities inside and outside 0 ... 1: every draw lands in its bounds, the checked spellings throw exactly where the plain ones would trap, and plain and checked agree on the same state |
 | `FuzzSeedTrees` | Steps down, overrides, rebuilds from `root` and `overriddenSeeds`, and snapshots, over a small key alphabet: the seed at every node against the derivation recomputed from the root with a dictionary of overrides, the path, the overrides, equality and hashing of a rebuilt tree, and a copy taken earlier unchanged |
 

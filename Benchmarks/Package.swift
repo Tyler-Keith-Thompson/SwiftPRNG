@@ -34,6 +34,16 @@ let package = Package(
             plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
         ),
         .executableTarget(
+            name: "DistributionsBenchmarks",
+            dependencies: [
+                .product(name: "Benchmark", package: "benchmark"),
+                .product(name: "Distributions", package: "SwiftPRNG"),
+                .product(name: "Generators", package: "SwiftPRNG"),
+            ],
+            path: "Benchmarks/DistributionsBenchmarks",
+            plugins: [.plugin(name: "BenchmarkPlugin", package: "benchmark")]
+        ),
+        .executableTarget(
             name: "SeedTreesBenchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "benchmark"),

@@ -65,6 +65,41 @@ let dropped = generator.bernoulli(0.01)
 Bounds that cannot be sampled trap, like an `Array` subscript; the `checked` spellings
 (`integer(checkedIn:)`, `uniform(checkedIn:)`, `bernoulli(checked:)`) throw instead.
 
+### Distributions
+
+Normal, exponential, triangular, log-normal, gamma, Poisson, geometric and weighted choice. Each
+fixes its algorithm and how many draws it takes, and computes its logarithms and cosines with a
+portable port of fdlibm, so a sample is the same on every platform, not just close.
+
+```swift
+var generator = Xoshiro256StarStar(seed: 42)
+let height = NormalDistribution(mean: 170, standardDeviation: 8).sample(using: &generator)
+let items = PoissonDistribution(mean: 3).sample(using: &generator)
+let aisle = WeightedChoiceDistribution([
+    (value: "produce", weight: 5), (value: "bakery", weight: 2), (value: "deli", weight: 1),
+]).sample(using: &generator)
+
+let service = SeedTree(42)["customer", 7, "service"].sample(.gamma(shape: 2, scale: 1.5))
+```
+
+A distribution is a value holding its parameters, so it can be stored, compared and shared.
+Invalid parameters trap; `init(checkedMean:standardDeviation:)` and the other `checked`
+initializers throw `InvalidParameters` instead.
+
+Your own distributions are extensions: `map` derives one from another, drawing nothing more.
+
+```swift
+extension Distribution where Self == MappedDistribution<ExponentialDistribution, Duration> {
+    /// Waiting times with this mean.
+    static func exponential(mean: Duration) -> Self {
+        let (seconds, attoseconds) = mean.components
+        return ExponentialDistribution(mean: Double(seconds) + Double(attoseconds) * 1e-18).map { .seconds($0) }
+    }
+}
+
+let wait = SeedTree(42)["customer", 7, "wait"].sample(.exponential(mean: .seconds(90)))
+```
+
 ### Streams that never overlap
 
 A jump advances a generator so far that the sequences before and after share nothing. One seed
@@ -138,8 +173,9 @@ a range its search needs.
 |---|---|
 | `Generators` | `SeedableRandomNumberGenerator`; `SplitMix64`, `Xoroshiro128Plus` and `Xoshiro256StarStar`, with `jump()` and `longJump()` |
 | `Sampling` | `uniform()`, `uniform(in:)`, `integer(in:)` and `bernoulli(_:)` on any `RandomNumberGenerator`, with checked spellings |
+| `Distributions` | `Distribution` and its samplers: `NormalDistribution`, `ExponentialDistribution`, `TriangularDistribution`, `LogNormalDistribution`, `GammaDistribution`, `PoissonDistribution`, `GeometricDistribution`, `WeightedChoiceDistribution`, `ConstantDistribution`, and `map` |
 | `SeedDiscovery` | `SeedSearch` and `ConcurrentSeedSearch`: the smallest seed in a range a predicate accepts |
-| `SeedTrees` | `SeedTree`, `SeedKey` and `SeedPath`: derived seeds by path, overrides and `fitting` |
+| `SeedTrees` | `SeedTree`, `SeedKey` and `SeedPath`: derived seeds by path, distributions sampled per node, overrides and `fitting` |
 
 ## Development
 
@@ -153,7 +189,7 @@ Bazel is the development build; SwiftPM is the published package. Both are gener
 | `just modules` | Regenerate `Package.swift` and every `BUILD.bazel` |
 | `just docs` | The DocC site into `.build/docs` |
 | `just bench` | The benchmarks (`Benchmarks/README.md`) |
-| `just diff` | The generators, draws and seed trees against pure-Python references (`Differential/README.md`) |
+| `just diff` | The generators, draws, distributions and seed trees against pure-Python references (`Differential/README.md`) |
 | `just fuzz` | The libFuzzer targets (`Fuzz/README.md`) |
 | `just generate` | An Xcode project from the Bazel graph |
 

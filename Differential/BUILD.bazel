@@ -10,6 +10,7 @@ swift_binary(
     srcs = glob(["Sources/SwiftPRNGDifferential/**/*.swift"]),
     module_name = "SwiftPRNGDifferential",
     deps = [
+        "//Sources/Distributions",
         "//Sources/Generators",
         "//Sources/Sampling",
         "//Sources/SeedTrees",

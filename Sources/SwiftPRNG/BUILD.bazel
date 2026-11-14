@@ -11,6 +11,7 @@ swift_library(
     deps = [
         "//Sources/Generators",
         "//Sources/Sampling",
+        "//Sources/Distributions",
         "//Sources/SeedDiscovery",
         "//Sources/SeedTrees",
     ],
@@ -25,6 +26,7 @@ docc_archive(
     deps = [
         "//Sources/Generators:GeneratorsDocumentation",
         "//Sources/Sampling:SamplingDocumentation",
+        "//Sources/Distributions:DistributionsDocumentation",
         "//Sources/SeedDiscovery:SeedDiscoveryDocumentation",
         "//Sources/SeedTrees:SeedTreesDocumentation",
     ],

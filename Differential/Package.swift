@@ -11,7 +11,7 @@ import PackageDescription
 
 // SwiftPM names a package at a path by its directory, whatever the checkout is called.
 let library = String(#filePath.split(separator: "/").dropLast(2).last!)
-let products: [Target.Dependency] = ["Generators", "Sampling", "SeedTrees"].map { .product(name: $0, package: library) }
+let products: [Target.Dependency] = ["Distributions", "Generators", "Sampling", "SeedTrees"].map { .product(name: $0, package: library) }
 
 let package = Package(
     name: "SwiftPRNGDifferential",

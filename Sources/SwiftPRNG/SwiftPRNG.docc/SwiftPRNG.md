@@ -8,7 +8,8 @@ Every type is a value. The generators (``/Generators``) reproduce bit for bit on
 and in every Swift release, and are `Hashable`, `Sendable` and `Codable`, so a position in a
 sequence can be copied, compared, saved and restored. The draws (``/Sampling``) fix their
 algorithms, where the standard library's `random(in:using:)` promises only a correct distribution.
-A seed tree (``/SeedTrees``) gives each decision in a program a seed of its own, derived from a
+The distributions (``/Distributions``) do the same for normal, exponential, gamma, Poisson and
+the rest, down to their logarithms and cosines. A seed tree (``/SeedTrees``) gives each decision in a program a seed of its own, derived from a
 path of names and indices, so adding a draw anywhere never shifts the numbers elsewhere. A seed
 search (``/SeedDiscovery``) finds the smallest seed in a range that does what a predicate asks,
 sequentially or across cores, and a tree fits that seed into one subtree while the rest of the
@@ -36,5 +37,6 @@ fitted?.overriddenSeeds  // [["customer", 7]: 33]
 
 - ``/Generators``
 - ``/Sampling``
+- ``/Distributions``
 - ``/SeedDiscovery``
 - ``/SeedTrees``

@@ -1,8 +1,9 @@
 # SwiftPRNG: notes for coding agents
 
 SwiftPRNG is a library of seeded random number generators (SplitMix64, xoroshiro128+, xoshiro256**),
-platform-stable draws, seed trees (a seed per decision, derived by path, with overrides) and seed
-searches (the smallest seed in a range a predicate accepts, sequentially or across cores). It
+platform-stable draws, distributions (normal, exponential, gamma, Poisson and the rest, on a port
+of fdlibm so samples match bit for bit across platforms), seed trees (a seed per decision, derived
+by path, with overrides) and seed searches (the smallest seed in a range a predicate accepts, sequentially or across cores). It
 optimizes for reproducibility: the same seed gives the same numbers everywhere, forever, and a
 seed that makes a scenario happen can be found, written down and fitted into one subtree. Its
 users are simulations and randomized tests; EventSimulation's SeedTree and generator came from here

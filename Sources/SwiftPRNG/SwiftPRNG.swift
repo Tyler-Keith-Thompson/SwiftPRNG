@@ -4,5 +4,6 @@
 
 @_exported import Generators
 @_exported import Sampling
+@_exported import Distributions
 @_exported import SeedDiscovery
 @_exported import SeedTrees

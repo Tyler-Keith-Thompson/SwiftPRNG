@@ -1,3 +1,4 @@
+import Distributions
 import Generators
 import Sampling
 
@@ -185,6 +186,18 @@ public struct SeedTree: Hashable, Sendable, CustomStringConvertible {
     public func bernoulli(_ probability: Double) -> Bool {
         var generator = generator
         return generator.bernoulli(probability)
+    }
+
+    /// A sample of `distribution` drawn from the start of this node's sequence. Two calls return
+    /// the same value.
+    ///
+    /// ```swift
+    /// let service = tree["customer", 7, "service"].sample(.exponential(mean: 4))
+    /// ```
+    @inlinable
+    public func sample<Value>(_ distribution: some Distribution<Value>) -> Value {
+        var generator = generator
+        return distribution.sample(using: &generator)
     }
 
     /// One SplitMix64 step from `value`: the derivation of a child's seed from its parent's seed

@@ -3,6 +3,14 @@
 import SwiftPRNG
 import Testing
 
+extension Distribution where Self == MappedDistribution<ExponentialDistribution, Duration> {
+    /// Waiting times with this mean.
+    static func exponential(mean: Duration) -> Self {
+        let (seconds, attoseconds) = mean.components
+        return ExponentialDistribution(mean: Double(seconds) + Double(attoseconds) * 1e-18).map { .seconds($0) }
+    }
+}
+
 @Suite("README examples", .timeLimit(.minutes(1)))
 struct READMEExamplesTests {
     @Test("Seeded generators")
@@ -30,6 +38,32 @@ struct READMEExamplesTests {
         #expect((0.5 ..< 2).contains(delay))
         #expect((0 ..< 4).contains(lane))
         #expect(dropped == false || dropped == true)
+    }
+
+    @Test("Distributions")
+    func distributions() {
+        var generator = Xoshiro256StarStar(seed: 42)
+        let height = NormalDistribution(mean: 170, standardDeviation: 8).sample(using: &generator)
+        let items = PoissonDistribution(mean: 3).sample(using: &generator)
+        let aisle = WeightedChoiceDistribution([
+            (value: "produce", weight: 5), (value: "bakery", weight: 2), (value: "deli", weight: 1),
+        ]).sample(using: &generator)
+
+        let service = SeedTree(42)["customer", 7, "service"].sample(.gamma(shape: 2, scale: 1.5))
+
+        #expect(height == 170 + 8 * -0.30326306467873804)
+        #expect(items >= 0)
+        #expect(["produce", "bakery", "deli"].contains(aisle))
+        #expect(service == SeedTree(42)["customer", 7, "service"].sample(GammaDistribution(shape: 2, scale: 1.5)))
+    }
+
+    @Test("Your own distributions")
+    func ownDistributions() {
+        let wait = SeedTree(42)["customer", 7, "wait"].sample(.exponential(mean: .seconds(90)))
+
+        let inSeconds = SeedTree(42)["customer", 7, "wait"].sample(.exponential(mean: 90))
+        #expect(wait == .seconds(inSeconds))
+        #expect(wait > .zero)
     }
 
     @Test("Streams that never overlap")
