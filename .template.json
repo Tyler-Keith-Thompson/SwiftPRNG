@@ -1,0 +1,16 @@
+{
+  "commit": "5893334ee65cc4d7274e9c64d1a0b9e6042932f2",
+  "name": "SwiftPRNG",
+  "type": "library",
+  "benchmarks": true,
+  "mutation": true,
+  "fuzz": true,
+  "differential": true,
+  "wasm": true,
+  "explore": false,
+  "fly": false,
+  "database": false,
+  "ci": true,
+  "trunk": false,
+  "modified": true
+}
