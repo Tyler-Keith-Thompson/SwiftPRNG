@@ -94,21 +94,24 @@ struct ConcurrentSeedSearchTests {
         #expect(count == 1500)
     }
 
-    @Test("Batches after a match are not started")
+    @Test("Batches after a match are not started: one worker tries exactly the seeds up to the match")
     func laterBatchesSkipped() async {
+        // One worker fixes the schedule: batch 0, then batch 1 (seeds 10 ..< 20), whose scan stops
+        // at the match, and nothing after. With more workers, how many batches run before the match is received
+        // depends on scheduling, so no count can be pinned.
         let tried = Mutex<Set<UInt64>>([])
-        let sut = SeedSearch(0 ..< 100_000).concurrent(workers: 2, batchSize: 10)
+        let sut = SeedSearch(0 ..< 100_000).concurrent(workers: 1, batchSize: 10)
+        let expectedSeed: UInt64 = 15
+        let expectedTried = Set<UInt64>(0 ... 15)
 
         let actual = await sut.first { seed in
             tried.withLock { _ = $0.insert(seed) }
             return seed == 15
         }
 
-        #expect(actual == 15)
-        // Batch 1 (seeds 10 ..< 20) matched; at most the two batches in flight ran past it.
-        let triedCount = tried.withLock { $0.count }
-        #expect(triedCount <= 40)
-        #expect(tried.withLock { $0.contains(15) })
+        let actualTried = tried.withLock { $0 }
+        #expect(actual == expectedSeed)
+        #expect(actualTried == expectedTried)
     }
 
     @Test("count(where:) sums the matches of every batch", .tags(.fixture))
