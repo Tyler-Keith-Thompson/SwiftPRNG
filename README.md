@@ -69,7 +69,8 @@ Bounds that cannot be sampled trap, like an `Array` subscript; the `checked` spe
 
 Normal, exponential, triangular, log-normal, gamma, Poisson, geometric and weighted choice. Each
 fixes its algorithm and how many draws it takes, and computes its logarithms and cosines with a
-portable port of fdlibm, so a sample is the same on every platform, not just close.
+portable port of fdlibm, so a sample is the same on every platform, not just close. The port's
+`Fdlibm.log`, `Fdlibm.log1p` and `Fdlibm.exp` are public, for seeded code of your own.
 
 ```swift
 var generator = Xoshiro256StarStar(seed: 42)
@@ -173,7 +174,7 @@ a range its search needs.
 |---|---|
 | `Generators` | `SeedableRandomNumberGenerator`; `SplitMix64`, `Xoroshiro128Plus` and `Xoshiro256StarStar`, with `jump()` and `longJump()` |
 | `Sampling` | `uniform()`, `uniform(in:)`, `integer(in:)` and `bernoulli(_:)` on any `RandomNumberGenerator`, with checked spellings |
-| `Distributions` | `Distribution` and its samplers: `NormalDistribution`, `ExponentialDistribution`, `TriangularDistribution`, `LogNormalDistribution`, `GammaDistribution`, `PoissonDistribution`, `GeometricDistribution`, `WeightedChoiceDistribution`, `ConstantDistribution`, and `map` |
+| `Distributions` | `Distribution` and its samplers: `NormalDistribution`, `ExponentialDistribution`, `TriangularDistribution`, `LogNormalDistribution`, `GammaDistribution`, `PoissonDistribution`, `GeometricDistribution`, `WeightedChoiceDistribution`, `ConstantDistribution`, and `map`; `Fdlibm`'s platform-stable `log`, `log1p` and `exp` |
 | `SeedDiscovery` | `SeedSearch` and `ConcurrentSeedSearch`: the smallest seed in a range a predicate accepts |
 | `SeedTrees` | `SeedTree`, `SeedKey` and `SeedPath`: derived seeds by path, distributions sampled per node, overrides and `fitting` |
 

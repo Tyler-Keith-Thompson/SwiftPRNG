@@ -17,11 +17,16 @@
 // one ulp of the true value. Constants are their bit patterns, the values fdlibm states in hex.
 // swift-numerics' RealModule was rejected: it forwards to the platform's libm. The functions stay
 // out of line (`@usableFromInline`, not `@inlinable`): inlined into each sampler they measured
-// slower, from the larger loop bodies.
+// slower, from the larger loop bodies. `log`, `log1p` and `exp` are public, for other packages'
+// seeded code; `cosPi` and the kernels stay `package`.
 
-/// Natural logarithm, exponential and cosine that return the same bits on every platform.
-@usableFromInline
-package enum Fdlibm {
+/// Natural logarithm and exponential that return the same bits on every platform.
+///
+/// Ports of fdlibm's functions that use only IEEE 754 arithmetic, so a seeded computation built on
+/// them (a sampler, a geometric skip) gives the same result on every platform and Swift release,
+/// where the platform's `log` and `exp` can differ in the last bit. Each result is within one ulp
+/// of the true value.
+public enum Fdlibm {
     @usableFromInline static let ln2Hi = Double(bitPattern: 0x3FE6_2E42_FEE0_0000)
     @usableFromInline static let ln2Lo = Double(bitPattern: 0x3DEA_39EF_3579_3C76)
     @usableFromInline static let lg1 = Double(bitPattern: 0x3FE5_5555_5555_5593)
@@ -32,9 +37,13 @@ package enum Fdlibm {
     @usableFromInline static let lg6 = Double(bitPattern: 0x3FC3_9A09_D078_C69F)
     @usableFromInline static let lg7 = Double(bitPattern: 0x3FC2_F112_DF3E_5244)
 
-    /// The natural logarithm of `x`: −∞ at zero, NaN below it.
-    @usableFromInline
-    package static func log(_ x: Double) -> Double {
+    /// The natural logarithm of `x`, the same bits on every platform.
+    ///
+    /// - Parameter x: The value whose logarithm to take.
+    /// - Returns: ln `x`, within one ulp: +0 at 1, −∞ at ±0, NaN for a negative `x` or NaN, and
+    ///   +∞ at +∞.
+    /// - Complexity: O(1).
+    public static func log(_ x: Double) -> Double {
         var x = x
         var bits = x.bitPattern
         var high = UInt32(truncatingIfNeeded: bits >> 32)
@@ -69,9 +78,13 @@ package enum Fdlibm {
         return s * (hfsq + r) + dk * ln2Lo - hfsq + f + dk * ln2Hi
     }
 
-    /// The natural logarithm of 1 + `x`, accurate for `x` near zero: −∞ at −1, NaN below it.
-    @usableFromInline
-    package static func log1p(_ x: Double) -> Double {
+    /// The natural logarithm of 1 + `x`, accurate for `x` near zero, the same bits on every platform.
+    ///
+    /// - Parameter x: The value to add to 1 before taking the logarithm.
+    /// - Returns: ln(1 + `x`), within one ulp: `x` itself for |`x`| < 2⁻⁵³ (±0 included), −∞ at
+    ///   −1, NaN below −1 or for NaN, and +∞ at +∞.
+    /// - Complexity: O(1).
+    public static func log1p(_ x: Double) -> Double {
         let high = UInt32(truncatingIfNeeded: x.bitPattern >> 32)
         var k: Int32 = 1
         var f = 0.0
@@ -124,9 +137,13 @@ package enum Fdlibm {
     @usableFromInline static let p4 = Double(bitPattern: 0xBEBB_BD41_C5D2_6BF1)
     @usableFromInline static let p5 = Double(bitPattern: 0x3E66_3769_72BE_A4D0)
 
-    /// e raised to `x`: +∞ above about 709.78, zero below about −745.13.
-    @usableFromInline
-    package static func exp(_ x: Double) -> Double {
+    /// e raised to `x`, the same bits on every platform.
+    ///
+    /// - Parameter x: The exponent.
+    /// - Returns: eˣ, within one ulp: 1 at ±0, +∞ above about 709.78 (+∞ included), +0 below
+    ///   about −745.13 (−∞ included), a subnormal between, and NaN for NaN.
+    /// - Complexity: O(1).
+    public static func exp(_ x: Double) -> Double {
         var x = x
         let word = UInt32(truncatingIfNeeded: x.bitPattern >> 32)
         let sign = Int32(word >> 31)

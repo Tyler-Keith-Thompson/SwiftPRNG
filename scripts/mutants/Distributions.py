@@ -23,6 +23,9 @@ CHOICE = "WeightedChoiceDistribution.swift"
 
 MUTANTS = [
     # The portable math.
+    # The public entry points' special values: −0 is a zero, and +∞ is its own logarithm.
+    Mutant("log_negativezero", MATH, "bits << 1 == 0", "bits == 0"),
+    Mutant("log_infinity", MATH, "high >= 0x7FF0_0000", "high > 0x7FF0_0000", nth=0),
     Mutant("log_noreduce", MATH, "high &+= 0x3FF0_0000 - 0x3FE6_A09E", "", mode="stmt"),
     Mutant("log_nolow", MATH, "s * (hfsq + r) + dk * ln2Lo - hfsq + f + dk * ln2Hi", "s * (hfsq + r) - hfsq + f + dk * ln2Hi"),
     Mutant("log_nosubnormal", MATH, "x *= 0x1p54", "", mode="stmt"),
