@@ -6,7 +6,7 @@ import PackageDescription
 // After changing it, run `just resolve`.
 let package = Package(
     name: "SwiftPRNGDependencies",
-    platforms: [.macOS("15.0")],
+    platforms: [.macOS("13.0")],
     dependencies: [
         .package(url: "https://github.com/x-sheep/swift-property-based", from: "2.0.1"),
     ]

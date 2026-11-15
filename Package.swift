@@ -60,7 +60,7 @@ let targets: [Target] = [
 let package = Package(
     name: "SwiftPRNG",
     // Keep in step with .bazelrc's --macos_minimum_os.
-    platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .watchOS(.v11), .visionOS(.v2)],
+    platforms: [.macOS(.v13), .macCatalyst(.v15), .iOS(.v15), .tvOS(.v16), .watchOS(.v9), .visionOS(.v1)],
     products: products,
     dependencies: dependencies,
     targets: targets.filter { $0.type != .test || wasiTests?.contains($0.name) ?? true }

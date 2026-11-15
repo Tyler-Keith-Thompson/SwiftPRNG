@@ -10,8 +10,8 @@ fits it into one subtree while the rest of the program stays as it was.
 
 ## Installation
 
-SwiftPRNG requires Swift 6.3 and supports macOS 15, iOS 18, tvOS 18, watchOS 11 and visionOS 2
-or later.
+SwiftPRNG requires Swift 6.3 and supports macOS 13, Mac Catalyst 15, iOS 15, tvOS 16, watchOS 9 and
+visionOS 1 or later.
 
 ```swift
 dependencies: [

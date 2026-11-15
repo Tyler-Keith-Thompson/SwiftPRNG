@@ -60,7 +60,7 @@ MODULES = [
 # one must be one too. A test target that depends on one, or on a Bazel label (`//tools/...`), runs
 # in the simulator as an ios_unit_test, and Package.swift leaves it out as well.
 IOS_MODULES = []
-IOS_MINIMUM = "18.0"
+IOS_MINIMUM = "15.0"
 
 # Executables: (name, description, dependencies). Each is an `.executableTarget` and product in
 # Package.swift and a swift_binary in Bazel (`bazel run //Sources/<name>`). Keep them thin: the
@@ -123,8 +123,11 @@ BENCHMARKS = [
 BENCHMARK_PACKAGE = ("https://github.com/ordo-one/benchmark", "1.27.0")
 
 # Keep in step with .bazelrc's --macos_minimum_os.
-PLATFORMS = '[.macOS(.v15), .iOS(.v18), .tvOS(.v18), .watchOS(.v11), .visionOS(.v2)]'
-MACOS_MINIMUM = "15.0"
+# The lowest floors the code builds at: nothing in Sources needs a newer OS, and a dependent
+# package supporting these OSes can then depend on SwiftPRNG. An API that needs more gets a narrow
+# @available rather than a higher floor.
+PLATFORMS = '[.macOS(.v13), .macCatalyst(.v15), .iOS(.v15), .tvOS(.v16), .watchOS(.v9), .visionOS(.v1)]'
+MACOS_MINIMUM = "13.0"
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

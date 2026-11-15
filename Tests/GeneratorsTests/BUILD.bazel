@@ -39,7 +39,7 @@ macos_unit_test(
     name = "GeneratorsTestsBundle",
     bundle_name = "GeneratorsTests",
     size = "small",
-    minimum_os_version = "15.0",
+    minimum_os_version = "13.0",
     tags = ["manual", "no-sandbox"],
     # Visible so `//:xcodeproj` can name it as a top-level target.
     visibility = ["//visibility:public"],

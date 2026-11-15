@@ -94,6 +94,8 @@ struct ConcurrentSeedSearchTests {
         #expect(count == 1500)
     }
 
+    // Mutex needs these OSes; the package's floors are lower, so only this test asks for them.
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test("Batches after a match are not started: one worker tries exactly the seeds up to the match")
     func laterBatchesSkipped() async {
         // One worker fixes the schedule: batch 0, then batch 1 (seeds 10 ..< 20), whose scan stops
