@@ -26,4 +26,6 @@ collection takes none. `element(in:)` takes one integer draw, or none for an emp
 
 A bound that can't be sampled traps, the way an out-of-range `Array` subscript does. To get an
 error instead, use the `checked` spellings: `integer(checkedIn:)`, `uniform(checkedIn:)` and
-`bernoulli(checked:)` all throw.
+`bernoulli(checked:)` all throw. Their errors, `EmptyRange`, `InvalidInterval` and `InvalidProbability`,
+are top-level types. If another module you import declares one with the same name, qualify ours
+by its module: `Sampling.EmptyRange`.

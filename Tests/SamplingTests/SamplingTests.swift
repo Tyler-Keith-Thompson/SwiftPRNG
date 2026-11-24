@@ -143,6 +143,18 @@ struct SamplingTests {
         #expect(sut.values == expectedRemaining)
     }
 
+    @Test("The checked spellings' errors can be spelled with their module's name")
+    func errorsQualifiedByModule() {
+        var sut = Xoshiro256StarStar(seed: 42)
+        let emptyRange: Range<Int> = 3 ..< 3
+        let emptyInterval: Range<Double> = 2 ..< 2
+        let probability = 1.5
+
+        #expect(throws: Sampling.EmptyRange()) { try sut.integer(checkedIn: emptyRange) }
+        #expect(throws: Sampling.InvalidInterval()) { try sut.uniform(checkedIn: emptyInterval) }
+        #expect(throws: Sampling.InvalidProbability()) { try sut.bernoulli(checked: probability) }
+    }
+
     @Test("integer(checkedIn:) throws EmptyRange for an empty range and agrees otherwise")
     func checkedInteger() throws {
         var sut = Xoshiro256StarStar(seed: 42)

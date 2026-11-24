@@ -110,6 +110,9 @@ extension RandomNumberGenerator {
 }
 
 /// The error ``Swift/RandomNumberGenerator/integer(checkedIn:)`` throws for an empty range.
+///
+/// In a file that also imports another module declaring an `EmptyRange`, spell this one
+/// `Sampling.EmptyRange`. The module name qualifies it through `import SwiftPRNG` too.
 @frozen
 public struct EmptyRange: Error, Hashable, Sendable {
     @inlinable
@@ -118,6 +121,9 @@ public struct EmptyRange: Error, Hashable, Sendable {
 
 /// The error ``Swift/RandomNumberGenerator/uniform(checkedIn:)`` throws for bounds that are not
 /// finite or not increasing.
+///
+/// In a file that also imports another module declaring an `InvalidInterval`, spell this one
+/// `Sampling.InvalidInterval`. The module name qualifies it through `import SwiftPRNG` too.
 @frozen
 public struct InvalidInterval: Error, Hashable, Sendable {
     @inlinable
@@ -126,6 +132,9 @@ public struct InvalidInterval: Error, Hashable, Sendable {
 
 /// The error ``Swift/RandomNumberGenerator/bernoulli(checked:)`` throws for a probability
 /// outside 0 ... 1.
+///
+/// In a file that also imports another module declaring an `InvalidProbability`, spell this one
+/// `Sampling.InvalidProbability`. The module name qualifies it through `import SwiftPRNG` too.
 @frozen
 public struct InvalidProbability: Error, Hashable, Sendable {
     @inlinable
