@@ -28,10 +28,19 @@ let tree = SeedTree(42)
 let fitted = tree.fitting(["customer", 7], in: SeedSearch(0 ..< 100_000)) { tree in
     tree["customer", 7, "arrival"].uniform(in: 0 ..< 60) < 1
 }
-fitted?.overriddenSeeds  // [["customer", 7]: 33]
+let overrides = fitted?.overriddenSeeds  // [["customer", 7]: 33]
 ```
 
 ## Topics
+
+### Guides
+
+- <doc:SeededGenerators>
+- <doc:PlatformStableDraws>
+- <doc:SamplingDistributions>
+- <doc:NonOverlappingStreams>
+- <doc:UsingSeedTrees>
+- <doc:SearchingSeedsAcrossCores>
 
 ### Modules
 

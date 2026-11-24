@@ -31,118 +31,11 @@ Then add a product to your target, either the umbrella or individual modules:
 
 ## Usage
 
-Every example here is a test in `Tests/SwiftPRNGTests`, so it cannot drift from the code.
-
-### Seeded generators
-
-Every generator is a value: `Hashable`, `Sendable` and `Codable`, so a position in a sequence can
-be copied, compared, saved and restored. All of them drive the standard library's randomness API.
+Fit one subtree of a seed tree so that a scenario happens, with every other draw left as it was:
 
 ```swift
 import SwiftPRNG
 
-var generator = Xoshiro256StarStar(seed: 42)
-let roll = Int.random(in: 1 ... 6, using: &generator)
-let hand = ["♠", "♥", "♦", "♣"].shuffled(using: &generator)
-```
-
-`Xoshiro256StarStar` is the general-purpose choice. `Xoroshiro128Plus` is a little faster where
-only `Double`s are drawn, and `SplitMix64` seeds the others.
-
-### Platform-stable draws
-
-The standard library's `random(in:using:)` promises a correct distribution, not the same answer
-in every release. These draws fix the algorithm, so a seed means the same numbers everywhere.
-
-```swift
-var generator = Xoshiro256StarStar(seed: 42)
-let unit = generator.uniform()                  // 0.08386297105988216, in [0, 1)
-let delay = generator.uniform(in: 0.5 ..< 2)    // seconds
-let lane = generator.integer(in: 0 ..< 4)
-let dropped = generator.bernoulli(0.01)
-```
-
-Bounds that cannot be sampled trap, like an `Array` subscript; the `checked` spellings
-(`integer(checkedIn:)`, `uniform(checkedIn:)`, `bernoulli(checked:)`) throw instead.
-
-### Distributions
-
-Normal, exponential, triangular, log-normal, gamma, Poisson, geometric and weighted choice. Each
-fixes its algorithm and how many draws it takes, and computes its logarithms and cosines with a
-portable port of fdlibm, so a sample is the same on every platform, not just close. The port's
-`Fdlibm.log`, `Fdlibm.log1p` and `Fdlibm.exp` are public, for seeded code of your own.
-
-```swift
-var generator = Xoshiro256StarStar(seed: 42)
-let height = NormalDistribution(mean: 170, standardDeviation: 8).sample(using: &generator)
-let items = PoissonDistribution(mean: 3).sample(using: &generator)
-let aisle = WeightedChoiceDistribution([
-    (value: "produce", weight: 5), (value: "bakery", weight: 2), (value: "deli", weight: 1),
-]).sample(using: &generator)
-
-let service = SeedTree(42)["customer", 7, "service"].sample(.gamma(shape: 2, scale: 1.5))
-```
-
-A distribution is a value holding its parameters, so it can be stored, compared and shared.
-Invalid parameters trap; `init(checkedMean:standardDeviation:)` and the other `checked`
-initializers throw `InvalidParameters` instead.
-
-Your own distributions are extensions: `map` derives one from another, drawing nothing more.
-
-```swift
-extension Distribution where Self == MappedDistribution<ExponentialDistribution, Duration> {
-    /// Waiting times with this mean.
-    static func exponential(mean: Duration) -> Self {
-        let (seconds, attoseconds) = mean.components
-        return ExponentialDistribution(mean: Double(seconds) + Double(attoseconds) * 1e-18).map { .seconds($0) }
-    }
-}
-
-let wait = SeedTree(42)["customer", 7, "wait"].sample(.exponential(mean: .seconds(90)))
-```
-
-### Streams that never overlap
-
-A jump advances a generator so far that the sequences before and after share nothing. One seed
-gives one stream per thread, or one per entity, with no coordination.
-
-```swift
-var generator = Xoshiro256StarStar(seed: 42)
-var streams: [Xoshiro256StarStar] = []
-for _ in 0 ..< 4 {
-    streams.append(generator)
-    generator.jump()  // 2¹²⁸ steps on
-}
-```
-
-### Seed trees
-
-A `SeedTree` derives each node's seed from its parent's seed and a key, a name or an index. Every
-decision reads from its own node, so the arrival time of customer 7 is the same whether or not
-customer 6 was added, and whether or not the code before it drew one more number.
-
-```swift
-let tree = SeedTree(42)
-let arrival = tree["customer", 7, "arrival"].uniform(in: 0 ..< 60)
-var choices = tree["customer", 7, "choices"].generator
-let aisle = choices.integer(in: 0 ..< 12)
-let arrivals = (0 ..< 3).map { customer in tree["customer", customer, "arrival"].uniform(in: 0 ..< 60) }
-```
-
-Keys are names or indices: literals, or `String` and `Int` values.
-
-A node's `description` is its path and seed, `/customer/7 (seed 1271…)`: the thing to print when a
-test fails.
-
-### Fitting a subtree
-
-Overriding a node replaces its seed, and everything below it derives from the new one while
-siblings keep theirs. `fitting` searches for the override that makes a predicate true, so a
-scenario is built one requirement at a time: the customer who arrives in the first minute, the
-request that times out, the shuffle that puts the ace on top. Each fit leaves every other node's
-draws exactly as they were.
-
-```swift
 let tree = SeedTree(42)
 let fitted = tree.fitting(["customer", 7], in: SeedSearch(0 ..< 100_000)) { tree in
     tree["customer", 7, "arrival"].uniform(in: 0 ..< 60) < 1
@@ -150,23 +43,18 @@ let fitted = tree.fitting(["customer", 7], in: SeedSearch(0 ..< 100_000)) { tree
 let overrides = fitted?.overriddenSeeds  // [["customer", 7]: 33]
 ```
 
-The overrides are plain data: write them into the test, and `SeedTree(42, overrides:)` rebuilds
-the fitted tree anywhere.
+The overrides are plain data. Write them into the test, and `SeedTree(42, overrides:)` rebuilds the
+fitted tree anywhere.
 
-### Searching seeds across cores
-
-`SeedSearch` returns the smallest matching seed, so a search reproduces. `concurrent()` spreads it
-over every processor and finds the same seed.
-
-```swift
-let seed = await SeedSearch(0 ..< 10_000_000).concurrent().first { seed in
-    var generator = Xoshiro256StarStar(seed: seed)
-    return generator.uniform() > 0.999_99
-}
-```
-
-`count(where:)` says how many seeds in a range match, which is how rare a property is and how wide
-a range its search needs.
+The [documentation](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/) has a guide
+for each part:
+[seeded generators](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/swiftprng/seededgenerators),
+[platform-stable draws](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/swiftprng/platformstabledraws),
+[distributions](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/swiftprng/samplingdistributions),
+[streams that never overlap](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/swiftprng/nonoverlappingstreams),
+[seed trees](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/swiftprng/usingseedtrees)
+and [searching seeds across cores](https://tyler-keith-thompson.github.io/SwiftPRNG/documentation/swiftprng/searchingseedsacrosscores).
+Every example in the README and the guides is a test in `Tests/SwiftPRNGTests`.
 
 ## Modules
 
