@@ -98,9 +98,13 @@ extension RandomNumberGenerator {
     /// Draws below 2⁶⁴ mod `width` are rejected, leaving a whole number of copies of 0 ..< width.
     @inlinable
     mutating func offset(below width: UInt64) -> UInt64 {
-        let threshold = (0 &- width) % width
         var value = next()
-        while value < threshold { value = next() }
+        // The threshold is below width, so a draw at or above width is never rejected and never
+        // needs it: computing it only then keeps a 64-bit division off the common path.
+        if value < width {
+            let threshold = (0 &- width) % width
+            while value < threshold { value = next() }
+        }
         return value % width
     }
 }

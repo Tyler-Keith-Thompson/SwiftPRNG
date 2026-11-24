@@ -5,7 +5,11 @@
 # precondition only names the cause. shuffle_noguard: without the guard, an empty or one-element
 # collection starts the loop at offset -1 or 0, so it never runs and takes no draw; the guard only
 # keeps `index(before: endIndex)` off an empty collection, which for an Array is plain arithmetic
-# and doesn't trap.
+# and doesn't trap. offset_eagerthreshold: computing the threshold for every first draw, as
+# though the `if value < width` guard were gone, accepts and rejects the same draws, since the
+# threshold (2⁶⁴ mod width) is below width and a draw at or above width never falls under it; the
+# guard only skips a division. For the same reason `value <= width` would be equivalent too, so
+# it isn't planted.
 #
 # A *_fromend mutant comes before the mutant whose `old` lies inside its own, which then picks the
 # second occurrence (`nth=1`): the original text, in the schema's else branch.
@@ -30,6 +34,8 @@ MUTANTS = [
     Mutant("bernoulli_checkedupper", F, "guard probability >= 0, probability <= 1 else { throw InvalidProbability() }", "guard probability >= 0 else { throw InvalidProbability() }", mode="stmt"),
     Mutant("offset_nothreshold", F, "while value < threshold { value = next() }", "", mode="stmt"),
     Mutant("offset_threshold", F, "(0 &- width) % width", "width"),
+    Mutant("offset_neverrejects", F, "value < width", "false"),
+    Mutant("offset_eagerthreshold", F, "value < width", "true"),
     Mutant("shuffle_drawsatzero", C, "offset > 0", "offset >= 0", nth=1),
     Mutant("shuffle_noguard", C, "guard offset > 0 else { return }", "", mode="stmt"),
     Mutant("shuffle_noswap", C, "collection.swapAt(index, other)", "", mode="stmt"),

@@ -114,6 +114,35 @@ struct SamplingTests {
         #expect(sut.values.isEmpty)
     }
 
+    @Test("integer(in:) rejects a first draw below the width and below the threshold, then accepts the next")
+    func rejectionBelowWidth() {
+        // Width 10 leaves 2⁶⁴ mod 10 = 6 values to reject: 3 is below both the width and the
+        // threshold, so it is drawn again; 17 is accepted and gives 17 % 10.
+        let range: Range<Int> = 0 ..< 10
+        let expected = 7
+        let expectedRemaining: [UInt64] = [99]
+        var sut = ScriptedGenerator(values: [3, 17, 99])
+
+        let actual = sut.integer(in: range)
+
+        #expect(actual == expected)
+        #expect(sut.values == expectedRemaining)
+    }
+
+    @Test("integer(in:) accepts a first draw below the width but not below the threshold, in one draw")
+    func acceptanceBelowWidth() {
+        // Width 10 rejects draws below 2⁶⁴ mod 10 = 6; 8 is below the width but not the threshold.
+        let range: Range<Int> = 0 ..< 10
+        let expected = 8
+        let expectedRemaining: [UInt64] = [99]
+        var sut = ScriptedGenerator(values: [8, 99])
+
+        let actual = sut.integer(in: range)
+
+        #expect(actual == expected)
+        #expect(sut.values == expectedRemaining)
+    }
+
     @Test("integer(checkedIn:) throws EmptyRange for an empty range and agrees otherwise")
     func checkedInteger() throws {
         var sut = Xoshiro256StarStar(seed: 42)
