@@ -192,7 +192,7 @@ Bazel is the development build; SwiftPM is the published package. Both are gener
 | `just bench` | The benchmarks (`Benchmarks/README.md`) |
 | `just diff` | The generators, draws, distributions and seed trees against pure-Python references (`Differential/README.md`) |
 | `just fuzz` | The libFuzzer targets (`Fuzz/README.md`) |
-| `just generate` | An Xcode project from the Bazel graph |
+| `just generate` | An Xcode project from the Bazel graph, in `xcode/` |
 
 `AGENTS.md` describes the layout, the workflow and the house rules in full.
 
