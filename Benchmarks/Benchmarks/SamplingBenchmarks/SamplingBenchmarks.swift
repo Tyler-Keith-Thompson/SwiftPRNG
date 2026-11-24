@@ -55,6 +55,60 @@ let benchmarks: @Sendable () -> Void = {
         }
     }
 
+    // The hand-written form the library must keep pace with: Fisher-Yates over integer(in:).
+    Benchmark("Sampling: BASELINE Fisher-Yates loop") { benchmark in
+        var elements = Array(0 ..< draws)
+        for _ in benchmark.scaledIterations {
+            var generator = Xoshiro256StarStar(seed: 42)
+            for i in stride(from: elements.count - 1, to: 0, by: -1) {
+                elements.swapAt(i, generator.integer(in: 0 ... i))
+            }
+            blackHole(elements)
+        }
+    }
+
+    Benchmark("Sampling: shuffle(_:)") { benchmark in
+        var elements = Array(0 ..< draws)
+        for _ in benchmark.scaledIterations {
+            var generator = Xoshiro256StarStar(seed: 42)
+            generator.shuffle(&elements)
+            blackHole(elements)
+        }
+    }
+
+    Benchmark("Sampling: shuffled(_:)") { benchmark in
+        let elements = Array(0 ..< draws)
+        for _ in benchmark.scaledIterations {
+            var generator = Xoshiro256StarStar(seed: 42)
+            blackHole(generator.shuffled(elements))
+        }
+    }
+
+    // The hand-written pick with element(in:)'s contract: no draw for an empty array. A bare
+    // subscript would trap on empty instead, which lets the optimizer hoist the rejection
+    // threshold out of the loop, so it is not the same work.
+    Benchmark("Sampling: BASELINE subscript at integer(in:)") { benchmark in
+        let elements = Array(0 ..< 1000)
+        for _ in benchmark.scaledIterations {
+            var generator = Xoshiro256StarStar(seed: 42)
+            var sum = 0
+            for _ in 0 ..< draws {
+                sum &+= elements.isEmpty ? 0 : elements[generator.integer(in: 0 ..< elements.count)]
+            }
+            blackHole(sum)
+        }
+    }
+
+    Benchmark("Sampling: element(in:)") { benchmark in
+        let elements = Array(0 ..< 1000)
+        for _ in benchmark.scaledIterations {
+            var generator = Xoshiro256StarStar(seed: 42)
+            var sum = 0
+            for _ in 0 ..< draws { sum &+= generator.element(in: elements) ?? 0 }
+            blackHole(sum)
+        }
+    }
+
     Benchmark("Sampling: bernoulli(_:)") { benchmark in
         for _ in benchmark.scaledIterations {
             var generator = Xoshiro256StarStar(seed: 42)

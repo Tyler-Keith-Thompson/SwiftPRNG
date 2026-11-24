@@ -61,7 +61,7 @@ Every example in the README and the guides is a test in `Tests/SwiftPRNGTests`.
 | Module | Holds |
 |---|---|
 | `Generators` | `SeedableRandomNumberGenerator`; `SplitMix64`, `Xoroshiro128Plus` and `Xoshiro256StarStar`, with `jump()` and `longJump()` |
-| `Sampling` | `uniform()`, `uniform(in:)`, `integer(in:)` and `bernoulli(_:)` on any `RandomNumberGenerator`, with checked spellings |
+| `Sampling` | `uniform()`, `uniform(in:)`, `integer(in:)`, `bernoulli(_:)`, `shuffle(_:)`, `shuffled(_:)` and `element(in:)` on any `RandomNumberGenerator`, with checked spellings |
 | `Distributions` | `Distribution` and its samplers: `NormalDistribution`, `ExponentialDistribution`, `TriangularDistribution`, `LogNormalDistribution`, `GammaDistribution`, `PoissonDistribution`, `GeometricDistribution`, `WeightedChoiceDistribution`, `ConstantDistribution`, and `map`; `Fdlibm`'s platform-stable `log`, `log1p` and `exp` |
 | `SeedDiscovery` | `SeedSearch` and `ConcurrentSeedSearch`: the smallest seed in a range a predicate accepts |
 | `SeedTrees` | `SeedTree`, `SeedKey` and `SeedPath`: derived seeds by path, distributions sampled per node, overrides and `fitting` |

@@ -1,6 +1,8 @@
 """The draws against the same algorithms written out in Python over the reference xoshiro256**
 sequence: the top 53 bits scaled into [0, 1), rejection sampling for integers, the affine map
-and clamp for intervals, and the comparison for a Bernoulli trial."""
+and clamp for intervals, the comparison for a Bernoulli trial, Fisher-Yates from the last offset
+down for a shuffle, and one integer draw for an element pick. The generator's next value after a
+shuffle or a pick pins how many draws it took."""
 
 import math
 import struct
@@ -36,6 +38,8 @@ def generate(rng):
         "intervalLower": low,
         "intervalUpper": low + rng.choice([1e-9, 1.0, 1e6, 1e12]),
         "probability": rng.choice([0.0, 1.0, rng.random()]),
+        "shuffleCount": rng.choice([0, 1, 2, rng.randrange(3, 64)]),
+        "elementCount": rng.choice([0, 1, rng.randrange(2, 1 << 20)]),
     }
 
 
@@ -49,6 +53,17 @@ def offset(sequence, width):
     while value < threshold:
         value = next(sequence)
     return value % width
+
+
+def shuffle(sequence, elements):
+    for i in range(len(elements) - 1, 0, -1):
+        j = offset(sequence, i + 1)
+        elements[i], elements[j] = elements[j], elements[i]
+    return elements
+
+
+def element(sequence, count):
+    return None if count == 0 else offset(sequence, count)
 
 
 def to_signed(value):
@@ -79,6 +94,12 @@ def reference(case):
     answer["interval"] = repr(max(low, min(value, math.nextafter(high, -math.inf))))
     s = sequence_from(seed)
     answer["bernoulli"] = uniform(s) < case["probability"]
+    s = sequence_from(seed)
+    answer["shuffled"] = shuffle(s, list(range(case["shuffleCount"])))
+    answer["afterShuffle"] = next(s)
+    s = sequence_from(seed)
+    answer["element"] = element(s, case["elementCount"])
+    answer["afterElement"] = next(s)
     return answer
 
 

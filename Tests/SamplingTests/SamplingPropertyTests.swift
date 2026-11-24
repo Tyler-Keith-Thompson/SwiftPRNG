@@ -81,6 +81,73 @@ struct SamplingPropertyTests {
         }
     }
 
+    @Test("shuffle(_:) equals Fisher-Yates written out and leaves the generator where it does", .tags(.randomized))
+    func shuffleReference() async {
+        await propertyCheck(count: 300, input: Gen.uint64(), Gen.int(in: 0 ... 200)) { seed, count in
+            var expected = Array(0 ..< count)
+            var reference = Xoshiro256StarStar(seed: seed)
+            var i = count - 1
+            while i > 0 {
+                let j = reference.integer(in: 0 ... i)
+                let held = expected[i]
+                expected[i] = expected[j]
+                expected[j] = held
+                i -= 1
+            }
+            var actual = Array(0 ..< count)
+            var sut = Xoshiro256StarStar(seed: seed)
+
+            sut.shuffle(&actual)
+
+            #expect(actual == expected)
+            #expect(sut == reference)
+            #expect(actual.sorted() == Array(0 ..< count))
+        }
+    }
+
+    @Test("shuffled(_:) is a permutation equal to shuffle(_:) on the array", .tags(.randomized))
+    func shuffledReference() async {
+        await propertyCheck(count: 300, input: Gen.uint64(), Gen.int(in: 0 ... 200)) { seed, count in
+            var expected = Array(0 ..< count)
+            var reference = Xoshiro256StarStar(seed: seed)
+            reference.shuffle(&expected)
+            var sut = Xoshiro256StarStar(seed: seed)
+
+            let actual = sut.shuffled((0 ..< count).lazy.map { $0 })
+
+            #expect(actual == expected)
+            #expect(sut == reference)
+        }
+    }
+
+    @Test("element(in:) is the element at one integer draw's offset, and nil without a draw when empty", .tags(.randomized))
+    func elementReference() async {
+        await propertyCheck(count: 500, input: Gen.uint64(), Gen.int(in: 0 ... 1_000)) { seed, count in
+            let elements = Array(0 ..< count).map { $0 * 3 }
+            var reference = Xoshiro256StarStar(seed: seed)
+            let expected = count == 0 ? nil : elements[reference.integer(in: 0 ..< count)]
+            var sut = Xoshiro256StarStar(seed: seed)
+
+            let actual = sut.element(in: elements)
+
+            #expect(actual == expected)
+            #expect(sut == reference)
+        }
+    }
+
+    @Test("Over many shuffles every permutation of three elements appears about equally often", .tags(.randomized))
+    func shuffleFrequencies() {
+        var sut = Xoshiro256StarStar(seed: 2024)
+        var counts: [[Int]: Int] = [:]
+        let shuffles = 60_000
+
+        for _ in 0 ..< shuffles { counts[sut.shuffled([0, 1, 2]), default: 0] += 1 }
+
+        // Each count is binomial with mean 10,000 and standard deviation about 91.
+        #expect(counts.count == 6)
+        #expect(counts.values.allSatisfy { abs($0 - 10_000) < 500 })
+    }
+
     @Test("Over many draws every value of a small range appears about equally often", .tags(.randomized))
     func integerFrequencies() {
         var sut = Xoshiro256StarStar(seed: 2024)

@@ -15,15 +15,15 @@ extension Distribution where Self == MappedDistribution<ExponentialDistribution,
 
 @Suite("Guide examples", .timeLimit(.minutes(1)))
 struct GuideExamplesTests {
-    @Test("SeededGenerators.md: a seed fixes the standard library's draws within one release")
+    @Test("SeededGenerators.md: a seed fixes the standard library's draws within one release, and the pinned shuffle in every release")
     func seededGenerators() {
         var generator = Xoshiro256StarStar(seed: 42)
         let roll = Int.random(in: 1 ... 6, using: &generator)
-        let hand = ["♠", "♥", "♦", "♣"].shuffled(using: &generator)
+        let hand = generator.shuffled(["♠", "♥", "♦", "♣"])  // the same order in every release
 
         var again = Xoshiro256StarStar(seed: 42)
         #expect(roll == Int.random(in: 1 ... 6, using: &again))
-        #expect(hand == ["♠", "♥", "♦", "♣"].shuffled(using: &again))
+        #expect(hand == again.shuffled(["♠", "♥", "♦", "♣"]))
         #expect((1 ... 6).contains(roll))
         #expect(hand.sorted() == ["♠", "♣", "♥", "♦"].sorted())
     }
@@ -35,11 +35,18 @@ struct GuideExamplesTests {
         let delay = generator.uniform(in: 0.5 ..< 2)    // seconds
         let lane = generator.integer(in: 0 ..< 4)
         let dropped = generator.bernoulli(0.01)
+        let order = generator.shuffled(["north", "south", "east", "west"])
+        let pick = generator.element(in: order)        // nil only for an empty collection
+        // From scripts/differential_sampling.py over seed 42's sequence.
+        let expectedOrder = ["south", "east", "west", "north"]
+        let expectedPick = "north"
 
         #expect(unit == 0.08386297105988216)
         #expect((0.5 ..< 2).contains(delay))
         #expect((0 ..< 4).contains(lane))
         #expect(dropped == false || dropped == true)
+        #expect(order == expectedOrder)
+        #expect(pick == expectedPick)
     }
 
     @Test("SamplingDistributions.md: samples come from the seed and stay in their ranges")
