@@ -1,5 +1,5 @@
 {
-  "commit": "ad6a8ae40621b76124cdeaa77eeb7172080faec6",
+  "commit": "dbb6a7a935d1e6ac5ebed87636c4fd347fad5f03",
   "name": "SwiftPRNG",
   "type": "library",
   "benchmarks": true,
@@ -11,5 +11,6 @@
   "fly": false,
   "database": false,
   "ci": true,
-  "trunk": false
+  "trunk": false,
+  "performance": true
 }

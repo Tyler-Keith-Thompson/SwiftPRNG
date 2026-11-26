@@ -21,6 +21,3 @@ Fuzz/.build
 
 # The differential package's SwiftPM build (`just diff --swiftpm`).
 Differential/.build
-
-# Overlays the bootstrap script copies over the template (server and embedded types); not built in place.
-templates
