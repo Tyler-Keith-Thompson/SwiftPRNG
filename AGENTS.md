@@ -7,7 +7,7 @@ by path, with overrides) and seed searches (the smallest seed in a range a predi
 optimizes for reproducibility: the same seed gives the same numbers everywhere, forever, and a
 seed that makes a scenario happen can be found, written down and fitted into one subtree. Its
 users are simulations and randomized tests; EventSimulation's SeedTree and generator came from here
-and must keep deriving the same seeds. Swift 6.3 (minimum).
+and must keep deriving the same seeds. Swift 6.4 (minimum).
 Bazel is the development build; SwiftPM is the published package. `README.md` is the user-facing
 overview.
 
@@ -37,7 +37,7 @@ tools/                           Bazel rule wrappers (warnings as errors, Swift 
 `scripts/modules.py`. Bazel builds none of it; `Benchmarks/BUILD.bazel` only caches each target's
 simulated counts (`tools/benchmarks.bzl`). See `Benchmarks/README.md`.
 `Fuzz/` is a separate SwiftPM package of libFuzzer targets that Bazel ignores, built with a
-swift.org toolchain through swiftly (`swiftly install 6.3.3`); see `Fuzz/README.md`.
+swift.org toolchain through swiftly (`swiftly install 6.4.3`); see `Fuzz/README.md`.
 
 ### Module graph
 
@@ -220,7 +220,7 @@ Every shell command gets a timeout. macOS has no `timeout`; use
 
 watchOS's arm64_32 and wasm32 have a 32-bit `Int`. `just wasi-test` (`scripts/wasi_test.py`)
 builds the SwiftPM test targets with `swift build --build-tests --swift-sdk
-swift-6.3.3-RELEASE_wasm` through swiftly into `.build/wasm`, then runs each test binary (one
+swift-6.4.3-RELEASE_wasm` through swiftly into `.build/wasm`, then runs each test binary (one
 `<Target>-test-runner.wasm` per target, or an older toolchain's one `<Project>PackageTests.xctest`)
 with `wasmtime run --dir . --dir <checkout>::<checkout> --argv0 <binary's path> <binary>
 --testing-library swift-testing`, logs in `.build/wasm/logs`. The checkout at its own path and the
@@ -229,7 +229,7 @@ binary's path as `argv[0]` are where SwiftPM's `Bundle.module` looks for a modul
 WASI's Foundation takes from `argv[0]`). `-c release` builds with `-enable-testing`, so suites that
 `@testable import` build in release too. A `--targets` name that isn't a test target is refused
 before anything builds, and a group fails when its build wrote no runner for one of its targets.
-Needs swiftly's 6.3.3 toolchain, its WebAssembly SDK (`swift sdk list`; swift.org's "Getting
+Needs swiftly's 6.4.3 toolchain, its WebAssembly SDK (`swift sdk list`; swift.org's "Getting
 Started with Swift SDKs for WebAssembly" has the install command) and `brew install wasmtime`. If
 the toolchain crashes on the manifest against a newer Xcode's SDK, pass `--xcode
 /Applications/Xcode-<older>.app`.
